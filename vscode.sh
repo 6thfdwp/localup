@@ -9,8 +9,9 @@ echo_info "Restoring VSCode settings and extensions..."
 git clone https://github.com/yourusername/vscode-config.git "$HOME/.vscode-config"
 ln -s "$HOME/.vscode-config/settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
 
+# install font: Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono
 # export common extensions
-# Theme: Nortics Arctis
+# Theme: Nortics Arctis. Font family: 
 # vim
 # language support
 # 
