@@ -1,0 +1,50 @@
+{
+    "security.workspace.trust.untrustedFiles": "open",
+    "workbench.colorTheme": "Visual Studio Light",
+    "editor.fontWeight": "500",
+    "editor.lineHeight": 20,
+    "editor.fontSize": 13,
+    "gitlens.hovers.currentLine.over": "line",
+    "gitlens.currentLine.enabled": false,
+    "gitlens.defaultDateLocale": null,
+    "terminal.integrated.fontFamily": "MesloLGS NF",
+    "vim.insertModeKeyBindings": [
+
+        {
+            "before": ["q", "q"],
+            "after": ["<Esc>"]
+        }
+    ],
+    "files.autoSave": "onWindowChange",
+    // "go.goroot": "/opt/homebrew/Cellar/go/1.19.3/libexec",
+    "editor.tabSize": 2,
+    "diffEditor.ignoreTrimWhitespace": true,
+    "editor.fontFamily": "Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono, MesloLGS NF, Menlo, Monaco",
+    "[html]": {
+        "editor.defaultFormatter": "vscode.html-language-features"
+    },
+    "explorer.confirmDelete": false,
+    "editor.fontVariations": true,
+    "editor.stickyScroll.enabled": true,
+    "workbench.editor.empty.hint": "hidden",
+    "editor.fontLigatures": false,
+    "gitlens.advanced.messages": {
+        "suppressBlameInvalidIgnoreRevsFileBadRevisionWarning": true
+    },
+    "gopls": {
+        
+    },
+    "window.zoomLevel": 1,
+    "accessibility.signals.lineHasError": {
+        "sound": "off"
+    },
+    "accessibility.signals.diffLineModified": {
+        "sound": "off"
+    },
+    "go.alternateTools": {},
+    "editor.accessibilitySupport": "off",
+    "go.gopath": "/Users/larryd/go",
+    "database-client.autoSync": true,
+    "go.goroot": "/Users/larryd/.g/go",
+    "editor.renderWhitespace": "all"
+}

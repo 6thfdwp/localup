@@ -6,4 +6,6 @@
 localup:
 	bash run.sh
 
+ideup:
+	bash vscode.sh
 # Add more targets as needed for additional setup tasks

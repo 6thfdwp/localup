@@ -4,18 +4,19 @@ if [ -f "$HOME/Library/Application Support/Code/User/settings.json" ]; then
     mv "$HOME/Library/Application Support/Code/User/settings.json" "$HOME/Library/Application Support/Code/User/settings.json.bak"
 fi
 
-
-echo_info "Restoring VSCode settings and extensions..."
-git clone https://github.com/yourusername/vscode-config.git "$HOME/.vscode-config"
-ln -s "$HOME/.vscode-config/settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
-
 # install font: Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono
 # export common extensions
-# Theme: Nortics Arctis. Font family: 
+# Theme: Nortics Arctis. Font family: Jetbrains Mono 
 # vim
 # language support
 # 
 # Install VSCode extensions
 while read -r extension; do
     code --install-extension "$extension"
-done < "$HOME/.vscode-config/extensions.txt"
+done < "./vsext.txt"
+
+echo_info "Restoring VSCode settings and extensions..."
+# git clone https://github.com/yourusername/vscode-config.git "$HOME/.vscode-config"
+# ln -sfn "$(pwd)/vssettings.json" "$HOME/Library/Application Support/Code/User/settings.json"
+cp "./vssettings.json" "$HOME/Library/Application Support/Code/User/settings.json"
+
