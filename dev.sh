@@ -15,10 +15,12 @@ if [ ! -d "$HOME/.nvm" ]; then
 else
     echo_success "NVM already installed."
 fi
+
 # Install and use the latest Node.js version
 if ! command -v brew &> /dev/null; then
     nvm install --lts
     nvm use --lts
+fi
 echo_success "Node.js setup complete with NVM. Version: $(node -v)"
 
 
@@ -52,7 +54,9 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
 else
     echo_success "✓ Oh My Zsh already installed."
 fi
+
 # restore .zshrc
 cp .zshrc ~/.zshrc
 source ~/.zshrc
+
 echo_success "Zsh setup complete with Oh My Zsh."
