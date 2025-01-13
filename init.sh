@@ -32,7 +32,7 @@ fi
 # brew install git zsh curl wget
 install_package_if_not() {
     # if ! brew list -1 | grep -q "^$1\$"; then
-    if ! command -v git &> /dev/null; then
+    if ! command -v $1 &> /dev/null; then
         echo_info "Installing $1..."
         brew install $1
     else
@@ -58,8 +58,6 @@ fi
 
 
 # Code langs env
-# install .g to manage multi Go version
-# install nvm 
 # python?
 # Install Oh My Zsh if not already installed
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -69,4 +67,4 @@ else
     echo_success "✓ Oh My Zsh already installed."
 fi
 # restore .zshrc
-cp .zshrc ~/.zshrc
+# cp .zshrc ~/.zshrc

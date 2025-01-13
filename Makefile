@@ -3,8 +3,8 @@
 .PHONY: localup
 
 # Target to run the local Mac setup script
-localup:
-	bash run.sh
+init:
+	bash init.sh
 
 ideup:
 	bash vscode.sh

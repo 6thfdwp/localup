@@ -8,7 +8,7 @@ export ZSH="$HOME/.oh-my-zsh"
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
-ZSH_THEME="amuse"
+# ZSH_THEME="amuse"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -76,10 +76,10 @@ source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
+eval $(/opt/homebrew/bin/brew shellenv) 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 # export MYSQL_HOME=/opt/homebrew/opt/mysql-client@5.7
 export PYTHON_HOME=~/Library/Python/3.9
-eval $(/opt/homebrew/bin/brew shellenv) 
 export PATH=$PYTHON_HOME/bin:$(go env GOPATH)/bin:$PATH
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -109,3 +109,5 @@ export NVM_DIR="$HOME/.nvm"
 
 [ -s "${HOME}/.g/env" ] && \. "${HOME}/.g/env"  # g shell setup
 
+# conflict with .g go version manager
+unalias g
