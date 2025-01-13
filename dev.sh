@@ -1,3 +1,10 @@
+echo_info() {
+    echo -e "\033[1;34m$1\033[0m"
+}
+echo_success() {
+    echo -e "\033[1;32m$1\033[0m"
+}
+
 # Install NVM (Node Version Manager)
 if [ ! -d "$HOME/.nvm" ]; then
     echo_info "Installing NVM (Node Version Manager)..."
@@ -9,8 +16,9 @@ else
     echo_success "NVM already installed."
 fi
 # Install and use the latest Node.js version
-nvm install --lts
-nvm use --lts
+if ! command -v brew &> /dev/null; then
+    nvm install --lts
+    nvm use --lts
 echo_success "Node.js setup complete with NVM. Version: $(node -v)"
 
 
@@ -22,8 +30,8 @@ else
 fi
 source "$HOME/.g/env"
 
-g install latest
-g use latest
+g install 1.22.10
+# g use 1.22.10
 echo_success "Go environment setup complete. Version: $(go version)"
 
 # Set Zsh as the default shell
