@@ -75,12 +75,10 @@ plugins=(git history-substring-search)
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
-
-eval $(/opt/homebrew/bin/brew shellenv) 
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 # export MYSQL_HOME=/opt/homebrew/opt/mysql-client@5.7
 export PYTHON_HOME=~/Library/Python/3.9
-export PATH=$PYTHON_HOME/bin:$(go env GOPATH)/bin:$PATH
+export PATH=$PYTHON_HOME/bin:$PATH
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
@@ -107,7 +105,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-[ -s "${HOME}/.g/env" ] && \. "${HOME}/.g/env"  # g shell setup
+[ -s "${HOME}/.g/env" ] && \. "${HOME}/.g/env"  # g shell setup with GOROOT in the PATH
 
-# conflict with .g go version manager
+eval $(/opt/homebrew/bin/brew shellenv) 
+
+# zsh git plugin conflict with .g go version manager
 unalias g
