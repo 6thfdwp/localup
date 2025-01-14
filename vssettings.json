@@ -16,7 +16,6 @@
         }
     ],
     "files.autoSave": "onWindowChange",
-    // "go.goroot": "/opt/homebrew/Cellar/go/1.19.3/libexec",
     "editor.tabSize": 2,
     "diffEditor.ignoreTrimWhitespace": true,
     "editor.fontFamily": "Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono, MesloLGS NF, Menlo, Monaco",
@@ -43,8 +42,8 @@
     },
     "go.alternateTools": {},
     "editor.accessibilitySupport": "off",
-    "go.gopath": "/Users/larryd/go",
+    "go.gopath": "/Users/wp.larryd/go",
     "database-client.autoSync": true,
-    "go.goroot": "/Users/larryd/.g/go",
+    "go.goroot": "/Users/wp.larryd/.g/go",
     "editor.renderWhitespace": "all"
 }
