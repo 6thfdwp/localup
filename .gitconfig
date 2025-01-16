@@ -1,0 +1,7 @@
+[alias]
+	logline = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+[user]
+	name = larryd
+	email = larry.ding@reejig.com
+[url "ssh://git@github.com/"]
+	insteadOf = https://github.com/

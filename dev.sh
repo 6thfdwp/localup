@@ -17,7 +17,7 @@ else
 fi
 
 # Install and use the latest Node.js version
-if ! command -v brew &> /dev/null; then
+if ! command -v nvm &> /dev/null; then
     nvm install --lts
     nvm use --lts
 fi
@@ -55,8 +55,8 @@ else
     echo_success "✓ Oh My Zsh already installed."
 fi
 
-# restore .zshrc
-cp .zshrc ~/.zshrc
-source ~/.zshrc
+# restore .zshrc maybe manually
+# cp .zshrc ~/.zshrc
+# source ~/.zshrc
 
-echo_success "Zsh setup complete with Oh My Zsh."
+# echo_success "Zsh setup complete with Oh My Zsh."
