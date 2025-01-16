@@ -31,32 +31,34 @@ else
     echo_success ".g already installed."
 fi
 source "$HOME/.g/env"
-
+# need to add GOPATH in .g/env. usually $HOME/go
 g install 1.22.10
 # g use 1.22.10
 echo_success "Go environment setup complete. Version: $(go version)"
 
-# Set Zsh as the default shell
-if [ "$SHELL" != "/bin/zsh" ]; then
-    echo_info "Setting Zsh as the default shell..."
-    chsh -s /bin/zsh
-    echo_success "✓ Zsh is now the default shell. Please restart your terminal."
-else
-    echo_success "✓ Zsh is already the default shell."
+
+#*************** IDE **************** #
+# install font: Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono
+brew install --cask font-jetbrains-mono
+
+# Clone VSCode settings and extensions
+if [ -f "$HOME/Library/Application Support/Code/User/settings.json" ]; then
+    echo_info "Backing up existing VSCode settings..."
+    mv "$HOME/Library/Application Support/Code/User/settings.json" "$HOME/Library/Application Support/Code/User/settings.json.bak"
 fi
 
+# export common extensions
+# Theme: Nortics Arctis. Font family: Jetbrains Mono 
+# 
+# Install VSCode extensions
+echo_info "Restoring VSCode settings and extensions..."
+while read -r extension; do
+    code --install-extension "$extension"
+done < "./vsext.txt"
 
-# python?
-# Install Oh My Zsh if not already installed
-if [ ! -d "$HOME/.oh-my-zsh" ]; then
-    echo_info "Installing Oh My Zsh..."
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-else
-    echo_success "✓ Oh My Zsh already installed."
-fi
-
+cp "./vssettings.json" "$HOME/Library/Application Support/Code/User/settings.json"
 # restore .zshrc maybe manually
 # cp .zshrc ~/.zshrc
 # source ~/.zshrc
 
-# echo_success "Zsh setup complete with Oh My Zsh."
+echo_success "Dev env done."

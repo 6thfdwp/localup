@@ -46,3 +46,20 @@ packages=(git zsh)
 for package in "${packages[@]}"; do
     install_package_if_not $package
 done
+
+# Set Zsh as the default shell
+if [ "$SHELL" != "/bin/zsh" ]; then
+    echo_info "Setting Zsh as the default shell..."
+    chsh -s /bin/zsh
+    echo_success "✓ Zsh is now the default shell. Please restart your terminal."
+else
+    echo_success "✓ Zsh is already the default shell."
+fi
+
+# Install Oh My Zsh if not already installed
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo_info "Installing Oh My Zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+    echo_success "✓ Oh My Zsh already installed."
+fi
