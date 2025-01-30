@@ -77,24 +77,29 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 # export MYSQL_HOME=/opt/homebrew/opt/mysql-client@5.7
-# export PYTHON_HOME=~/Library/Python/3.9
-# export PATH=$PYTHON_HOME/bin:$PATH
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH=$PYENV_ROOT/bin:$PATH
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
 # export brew, nvm and .g managed envs to PATH
 # need to come after export PATH above, otherwise it will be overriden
+# or we need to concatenate :$PATH at line 78
 # use echo $PATH to check if all good
 eval $(/opt/homebrew/bin/brew shellenv) 
 
+# This loads nvm and bash_completion
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-[ -s "${HOME}/.g/env" ] && \. "${HOME}/.g/env"  # g shell setup with GOROOT in the PATH
+ # g shell setup with GOROOT in the PATH
+[ -s "${HOME}/.g/env" ] && \. "${HOME}/.g/env" 
 # zsh git plugin conflict with .g go version manager
 unalias g
 
+# python version setup
+eval "$(pyenv init - zsh)"
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then

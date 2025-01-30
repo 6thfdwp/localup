@@ -36,6 +36,28 @@ g install 1.22.10
 # g use 1.22.10
 echo_success "Go environment setup complete. Version: $(go version)"
 
+if ! command -v pyenv &> /dev/null; then
+    echo_info "Installing Pyenv..."
+    # curl https://pyenv.run | bash
+    brew install pyenv
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    # eval "$(pyenv init --path)"
+    eval "$(pyenv init - zsh)"
+else
+    echo_success "Pyenv already installed."
+fi
+
+# Install Python 3.11
+pyenv install 3.11
+pyenv global 3.11
+# pyenv local 3.11.0 # only for current project dir
+# pyenv shell 3.11.0 # only for current shell session
+echo_success "Python environment setup complete. Version: $(python -V)"
+
+brew install pyenv-virtualenv
+# this need to be in .zshrc
+# eval "$(pyenv virtualenv-init -)"
 
 #*************** IDE **************** #
 # install font: Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono
