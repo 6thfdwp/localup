@@ -1,24 +1,16 @@
 {
     "security.workspace.trust.untrustedFiles": "open",
-    "workbench.colorTheme": "Visual Studio Light",
+    "workbench.colorTheme": "Default Light+",
     "editor.fontWeight": "500",
     "editor.lineHeight": 20,
     "editor.fontSize": 13,
     "gitlens.hovers.currentLine.over": "line",
     "gitlens.currentLine.enabled": false,
     "gitlens.defaultDateLocale": null,
-    "terminal.integrated.fontFamily": "MesloLGS NF",
-    "vim.insertModeKeyBindings": [
-
-        {
-            "before": ["q", "q"],
-            "after": ["<Esc>"]
-        }
-    ],
+    "terminal.integrated.fontFamily": "Jetbrains Mono Thin, Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono, MesloLGS NF, Menlo",
     "files.autoSave": "onWindowChange",
-    "editor.tabSize": 2,
     "diffEditor.ignoreTrimWhitespace": true,
-    "editor.fontFamily": "Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono Thin, Jetbrains Mono, MesloLGS NF, Menlo, Monaco",
+    "editor.fontFamily": "Jetbrains Mono Thin, Jetbrains Mono ExtraLight, Jetbrains Mono, Jetbrains Mono, MesloLGS NF, Menlo, Monaco",
     "[html]": {
         "editor.defaultFormatter": "vscode.html-language-features"
     },
@@ -43,7 +35,21 @@
     "go.alternateTools": {},
     "editor.accessibilitySupport": "off",
     "go.gopath": "/Users/wp.larryd/go",
-    "database-client.autoSync": true,
     "go.goroot": "/Users/wp.larryd/.g/go",
-    "editor.renderWhitespace": "all"
+    "editor.renderWhitespace": "all",
+    "terminal.external.osxExec": "Warp.app",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.python"
+    },
+    "go.buildTags": "integration",
+    "vim.vimrc.enable": true,
+    "vim.vimrc.path": "/Users/wp.larryd/.ideavimrc",
+    "editor.unicodeHighlight.ambiguousCharacters": false,
+    "markdown.preview.scrollEditorWithPreview": false,
+    "security.promptForLocalFileProtocolHandling": false,
+    "chat.instructionsFilesLocations": {
+        ".github/instructions": true,
+        "/var/folders/d_/nthh59h921gc1hy90j6dxy400000gp/T/postman-http-request-post-response.instructions.md": true,
+        "/var/folders/d_/nthh59h921gc1hy90j6dxy400000gp/T/postman-http-request-pre-request.instructions.md": true
+    }
 }
