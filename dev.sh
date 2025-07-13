@@ -100,37 +100,8 @@ echo_info "Setting up Python environment with uv..."
 if ! command_exists uv; then
     echo_info "Installing uv..."
     curl -LsSf https://astral.sh/uv/install.sh | sh
-    source "$HOME/.cargo/env"
 else
     echo_success "✓ uv already installed."
-fi
-
-# Source cargo environment for uv
-if [ -f "$HOME/.cargo/env" ]; then
-    source "$HOME/.cargo/env"
-fi
-
-# Check if uv is available
-if command_exists uv; then
-    echo_info "Setting up Python environment..."
-    
-    # Create a new virtual environment with Python 3.11
-    if [ ! -d ".venv" ]; then
-        echo_info "Creating virtual environment with Python 3.11..."
-        uv venv --python 3.11
-    else
-        echo_success "✓ Virtual environment already exists."
-    fi
-    
-    # # Activate virtual environment and install dependencies
-    # echo_info "Installing project dependencies..."
-    # source .venv/bin/activate
-    # uv sync
-    
-    echo_success "✓ Python environment setup complete. Version: $(python -V)"
-    echo_info "Virtual environment activated. Run 'source .venv/bin/activate' to activate in new shells."
-else
-    echo_warning "uv not found in PATH. Please restart your terminal and run this script again."
 fi
 
 # ==================== IDE SETUP ====================
@@ -150,18 +121,18 @@ if command_exists code; then
     fi
     
     # Install VSCode extensions
-    if [ -f "./vsext.txt" ]; then
+    if [ -f "./vs-extension.txt" ]; then
         echo_info "Installing VSCode extensions..."
         while read -r extension; do
             if [ -n "$extension" ] && [[ ! "$extension" =~ ^#.* ]]; then
                 code --install-extension "$extension"
             fi
-        done < "./vsext.txt"
+        done < "./vs-extension.txt"
     fi
     
     # Copy VSCode settings
-    if [ -f "./vssettings.json" ]; then
-        cp "./vssettings.json" "$HOME/Library/Application Support/Code/User/settings.json"
+    if [ -f "./vs-settings.json" ]; then
+        cp "./vs-settings.json" "$HOME/Library/Application Support/Code/User/settings.json"
         echo_success "✓ VSCode settings restored."
     fi
 else
@@ -170,14 +141,3 @@ fi
 
 # ==================== FINAL SETUP ====================
 echo_success "🎉 Development environment setup complete!"
-echo_info ""
-echo_info "Next steps:"
-echo_info "1. Restart your terminal to ensure all PATH changes take effect"
-echo_info "2. Activate the Python virtual environment: source .venv/bin/activate"
-echo_info "3. Run the application: uv run python main.py"
-echo_info ""
-echo_info "Available commands:"
-echo_info "- uv run python main.py    # Run the application"
-echo_info "- uv run pytest            # Run tests"
-echo_info "- uv add <package>         # Add new dependency"
-echo_info "- uv remove <package>      # Remove dependency"
