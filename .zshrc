@@ -77,8 +77,8 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 # export MYSQL_HOME=/opt/homebrew/opt/mysql-client@5.7
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH=$PYENV_ROOT/bin:$PATH
+# export PYENV_ROOT="$HOME/.pyenv"
+# export PATH=$PYENV_ROOT/bin:$PATH
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
@@ -99,7 +99,7 @@ export NVM_DIR="$HOME/.nvm"
 unalias g
 
 # python version setup
-eval "$(pyenv init - zsh)"
+# eval "$(pyenv init - zsh)"
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
