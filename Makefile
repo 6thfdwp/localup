@@ -9,6 +9,6 @@ init:
 devup:
 	bash dev.sh
 
-ideup:
-	bash vscode.sh
+gitconfig:
+	bash gitsetting.sh
 # Add more targets as needed for additional setup tasks
