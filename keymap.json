@@ -1,0 +1,83 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace && vim_mode == normal",
+    "bindings": {},
+  },
+  {
+    "context": "Editor && vim_mode == normal",
+    "bindings": {
+      // 1. Across Files: Definitions & References
+      "g d": "editor::GoToDefinition",
+      "g r": "editor::GoToNextReference",
+      "g I": "editor::GoToImplementation",
+      "g s": "outline::Toggle",
+      "g S": "project_symbols::Toggle",
+
+      // 2. Leader Key Shortcuts (Comma as Leader)
+      ", r": "pane::RevealInProjectPanel",
+
+      // 3. Close Tabs
+      "c r": "pane::CloseItemsToTheRight",
+      "c l": "pane::CloseItemsToTheLeft",
+    },
+  },
+  {
+    "context": "Dock || Terminal || VimControl",
+    "bindings": {
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
+      "ctrl-k": "workspace::ActivatePaneUp",
+      "ctrl-j": "workspace::ActivatePaneDown",
+    },
+  },
+  {
+    "context": "ProjectPanel || GitPanel || AssistantPanel || Terminal || VimControl",
+    "bindings": {
+      ", w": "project_panel::ToggleFocus",
+      ", g": "git_panel::ToggleFocus",
+      ", a": "agent::ToggleFocus",
+      ", t": "terminal_panel::ToggleFocus",
+      ", z": "workspace::IncreaseActiveDockSize",
+      "= =": "workspace::IncreaseActiveDockSize",
+      "- -": "workspace::DecreaseActiveDockSize",
+    },
+  },
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "escape": "editor::ToggleFocus",
+      "q q": "workspace::ToggleLeftDock",
+      "h": "project_panel::CollapseSelectedEntry",
+      "l": "project_panel::ExpandSelectedEntry",
+    },
+  },
+  {
+    "context": "GitPanel",
+    "bindings": {
+      "escape": "editor::ToggleFocus",
+      "q q": "workspace::ToggleLeftDock",
+      "j": "menu::SelectNext",
+      "k": "menu::SelectPrevious",
+    },
+  },
+  {
+    "context": "AssistantPanel",
+    "bindings": {
+      "escape": "editor::ToggleFocus",
+      "q q": "workspace::ToggleRightDock",
+    },
+  },
+  {
+    "context": "Terminal",
+    "bindings": {
+      "q q": "workspace::ToggleBottomDock",
+    },
+  },
+]
