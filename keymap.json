@@ -44,9 +44,8 @@
       ", g": "git_panel::ToggleFocus",
       ", a": "agent::ToggleFocus",
       ", t": "terminal_panel::ToggleFocus",
-      ", z": "workspace::IncreaseActiveDockSize",
-      "= =": "workspace::IncreaseActiveDockSize",
-      "- -": "workspace::DecreaseActiveDockSize",
+      ", =": "workspace::IncreaseActiveDockSize",
+      ", -": "workspace::DecreaseActiveDockSize",
     },
   },
   {
@@ -68,7 +67,7 @@
     },
   },
   {
-    "context": "AssistantPanel",
+    "context": "AssistantPanel || VimControl",
     "bindings": {
       "escape": "editor::ToggleFocus",
       "q q": "workspace::ToggleRightDock",
