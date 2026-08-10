@@ -11,4 +11,11 @@ devup:
 
 gitconfig:
 	bash gitsetting.sh
+
+# Parallel-agent workflow: tmux + git worktree tooling (wt / wt-rm)
+agentup:
+	bash agentup.sh
+
+agentup-check:
+	bash agentup.sh --check
 # Add more targets as needed for additional setup tasks

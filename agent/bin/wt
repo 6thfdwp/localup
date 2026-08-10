@@ -1,0 +1,191 @@
+#!/usr/bin/env bash
+# wt — create or attach to a git worktree, one tmux window per task.
+#
+#   wt <slug>     create (or re-enter) a worktree for <slug>
+#   wt            fzf-pick an existing worktree
+#   wt -l         list worktrees
+#
+# Per-repo setup (which gitignored files to copy in, how to install deps, how
+# to isolate ports/databases) is read from two places, in order:
+#
+#   <repo>/.wt.conf                    repo knowledge, lives with the repo
+#   ~/.config/wt/<repo-name>.conf      personal overrides, win on conflict
+#
+# Keep .wt.conf out of git via .git/info/exclude (a local-only ignore file) so
+# it never shows up in git status and never lands in a shared .gitignore.
+
+set -euo pipefail
+
+die() { printf '\033[31mwt:\033[0m %s\n' "$*" >&2; exit 1; }
+info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
+
+# --- locate the main worktree (works even when called from inside a linked one)
+git rev-parse --git-common-dir >/dev/null 2>&1 || die "not inside a git repository"
+COMMON_DIR=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+MAIN_REPO=$(dirname "$COMMON_DIR")
+REPO_NAME=$(basename "$MAIN_REPO")
+WT_ROOT="$MAIN_REPO/.claude/worktrees"
+
+# --- repo config ------------------------------------------------------------
+# Defaults are chosen so `wt <slug>` works in any repo with no config at all.
+
+# Whatever this repo actually calls its trunk — main, master, or a remote HEAD
+# pointing somewhere else. Hardcoding "origin/main" breaks on older projects.
+detect_base() {
+  local ref b
+  ref=$(git -C "$MAIN_REPO" symbolic-ref -q refs/remotes/origin/HEAD 2>/dev/null || true)
+  [[ -n "$ref" ]] && { echo "${ref#refs/remotes/}"; return; }
+  for b in origin/main origin/master main master; do
+    if git -C "$MAIN_REPO" show-ref -q --verify "refs/remotes/$b" 2>/dev/null \
+    || git -C "$MAIN_REPO" show-ref -q --verify "refs/heads/$b" 2>/dev/null; then
+      echo "$b"; return
+    fi
+  done
+  git -C "$MAIN_REPO" rev-parse --abbrev-ref HEAD
+}
+
+WT_COPY=()
+WT_SETUP=""
+WT_BASE="$(detect_base)"
+wt_configure() { :; }   # optional hook, called with $WT_PATH set
+
+# Repo config first, then personal config — sourced second so it wins.
+REPO_CONF="$MAIN_REPO/.wt.conf"
+USER_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/wt/$REPO_NAME.conf"
+[[ -f "$REPO_CONF" ]] && source "$REPO_CONF"
+[[ -f "$USER_CONF" ]] && source "$USER_CONF"
+
+# --- helpers ----------------------------------------------------------------
+
+# env_set <file> <KEY> <value>  — replace KEY= line, or append if absent.
+env_set() {
+  local file=$1 key=$2 val=$3
+  if [[ -f "$file" ]] && grep -qE "^${key}=" "$file"; then
+    # Use a temp file; sed -i differs between BSD and GNU.
+    awk -v k="$key" -v v="$val" \
+      'BEGIN{FS=OFS="="} $1==k {print k "=" v; next} {print}' \
+      "$file" >"$file.tmp" && mv "$file.tmp" "$file"
+  else
+    printf '%s=%s\n' "$key" "$val" >>"$file"
+  fi
+}
+
+# stable_num <string> <lo> <hi> — deterministic number in [lo,hi] from a string.
+stable_num() {
+  local h
+  h=$(printf '%s' "$1" | cksum | cut -d' ' -f1)
+  echo $(( $2 + h % ($3 - $2 + 1) ))
+}
+
+list_worktrees() {
+  git -C "$MAIN_REPO" worktree list --porcelain \
+    | awk '/^worktree /{print $2}' \
+    | grep -F "$WT_ROOT/" || true
+}
+
+# --- subcommands ------------------------------------------------------------
+
+if [[ "${1:-}" == "-l" || "${1:-}" == "--list" ]]; then
+  git -C "$MAIN_REPO" worktree list
+  exit 0
+fi
+
+SLUG="${1:-}"
+
+if [[ -z "$SLUG" ]]; then
+  command -v fzf >/dev/null || die "no slug given and fzf is not installed"
+  picked=$(list_worktrees | xargs -n1 basename 2>/dev/null | fzf --prompt='worktree> ' --height=40% --reverse) \
+    || exit 0
+  [[ -n "$picked" ]] || exit 0
+  SLUG="$picked"
+fi
+
+# sanitise: lowercase, non-alphanumerics collapse to '-'
+SLUG=$(printf '%s' "$SLUG" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+|-+$//g')
+[[ -n "$SLUG" ]] || die "slug is empty after sanitising"
+
+WT_PATH="$WT_ROOT/$SLUG"
+BRANCH="wt/$SLUG"
+
+# --- create -----------------------------------------------------------------
+if [[ -d "$WT_PATH" ]]; then
+  info "re-entering existing worktree $SLUG"
+else
+  mkdir -p "$WT_ROOT"
+
+  # Keep worktrees out of git status without editing a shared .gitignore.
+  # Most repos have no rule for this, so do it once, locally, per repo.
+  EXCLUDE="$COMMON_DIR/info/exclude"
+  if ! git -C "$MAIN_REPO" check-ignore -q .claude/worktrees 2>/dev/null; then
+    mkdir -p "$(dirname "$EXCLUDE")"
+    printf '\n# worktrees created by `wt`\n.claude/worktrees/\n' >>"$EXCLUDE"
+    info "excluded .claude/worktrees/ via .git/info/exclude"
+  fi
+
+  if [[ "$WT_BASE" == */* ]]; then
+    info "fetching $WT_BASE"
+    git -C "$MAIN_REPO" fetch --quiet "${WT_BASE%%/*}" 2>/dev/null \
+      || info "fetch failed (offline?) — branching from local $WT_BASE"
+  else
+    info "branching from local $WT_BASE (no remote)"
+  fi
+
+  info "creating worktree at .claude/worktrees/$SLUG on branch $BRANCH"
+  if git -C "$MAIN_REPO" show-ref --verify --quiet "refs/heads/$BRANCH"; then
+    git -C "$MAIN_REPO" worktree add "$WT_PATH" "$BRANCH"
+  else
+    git -C "$MAIN_REPO" worktree add -b "$BRANCH" "$WT_PATH" "$WT_BASE"
+  fi
+
+  # copy gitignored local files the worktree would otherwise be missing
+  # ${a[@]+"${a[@]}"} rather than "${a[@]}": on bash 3.2 (what macOS ships) an
+  # empty array trips `set -u`, which is the no-config case.
+  for rel in ${WT_COPY[@]+"${WT_COPY[@]}"}; do
+    src="$MAIN_REPO/$rel"
+    if [[ -e "$src" ]]; then
+      mkdir -p "$(dirname "$WT_PATH/$rel")"
+      cp -R "$src" "$WT_PATH/$rel"
+      info "copied $rel"
+    fi
+  done
+
+  # per-repo isolation (ports, database names, ...)
+  wt_configure
+
+  if [[ -n "$WT_SETUP" ]]; then
+    info "running setup: $WT_SETUP"
+    ( cd "$WT_PATH" && eval "$WT_SETUP" )
+  fi
+fi
+
+# --- tmux -------------------------------------------------------------------
+if ! command -v tmux >/dev/null; then
+  info "tmux not installed — dropping you into a subshell instead"
+  cd "$WT_PATH" && exec "${SHELL:-/bin/zsh}"
+fi
+
+SESSION="$REPO_NAME"
+
+open_window() {
+  # left pane: agent. right pane: shell for tests/git.
+  tmux new-window -t "$SESSION" -n "$SLUG" -c "$WT_PATH"
+  tmux split-window -h -t "$SESSION:$SLUG" -c "$WT_PATH"
+  # -L rather than a pane index: pane-base-index may be 0 or 1.
+  tmux select-pane -t "$SESSION:$SLUG" -L
+}
+
+if ! tmux has-session -t "$SESSION" 2>/dev/null; then
+  tmux new-session -d -s "$SESSION" -n "$SLUG" -c "$WT_PATH"
+  tmux split-window -h -t "$SESSION:$SLUG" -c "$WT_PATH"
+  tmux select-pane -t "$SESSION:$SLUG" -L
+elif ! tmux list-windows -t "$SESSION" -F '#W' | grep -qx "$SLUG"; then
+  open_window
+fi
+
+tmux select-window -t "$SESSION:$SLUG"
+
+if [[ -n "${TMUX:-}" ]]; then
+  tmux switch-client -t "$SESSION"
+else
+  exec tmux attach -t "$SESSION"
+fi

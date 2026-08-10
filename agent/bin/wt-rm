@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# wt-rm — tear down a worktree: remove the directory, delete its branch,
+#         close its tmux window.
+#
+#   wt-rm <slug>        tear down one worktree
+#   wt-rm               fzf-pick one
+#   wt-rm --merged      sweep every worktree whose branch is merged into main
+#   wt-rm <slug> -f     tear down even with uncommitted or unpushed work
+#
+# Refuses by default if the worktree is dirty or has commits that aren't on the
+# remote. Worktree sprawl is the real failure mode of this workflow, but so is
+# deleting the one branch you hadn't pushed yet.
+
+set -euo pipefail
+
+die() { printf '\033[31mwt-rm:\033[0m %s\n' "$*" >&2; exit 1; }
+info() { printf '\033[36m==>\033[0m %s\n' "$*"; }
+warn() { printf '\033[33m!!\033[0m %s\n' "$*" >&2; }
+
+git rev-parse --git-common-dir >/dev/null 2>&1 || die "not inside a git repository"
+COMMON_DIR=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+MAIN_REPO=$(dirname "$COMMON_DIR")
+REPO_NAME=$(basename "$MAIN_REPO")
+WT_ROOT="$MAIN_REPO/.claude/worktrees"
+
+# In sweep mode a guarded worktree is skipped so the rest still get cleaned up;
+# in single-target mode it's a hard error.
+SWEEP=0
+guard_fail() {
+  if [[ $SWEEP -eq 1 ]]; then warn "$* — skipping"; return 1; fi
+  die "$*"
+}
+
+FORCE=0
+MERGED=0
+DROP_DB=0
+SLUG=""
+for arg in "$@"; do
+  case "$arg" in
+    -f|--force) FORCE=1 ;;
+    --merged)   MERGED=1 ;;
+    --drop-db)  DROP_DB=1 ;;
+    -*)         die "unknown flag: $arg" ;;
+    *)          SLUG="$arg" ;;
+  esac
+done
+
+list_slugs() {
+  git -C "$MAIN_REPO" worktree list --porcelain \
+    | awk '/^worktree /{print $2}' \
+    | grep -F "$WT_ROOT/" \
+    | xargs -n1 basename 2>/dev/null || true
+}
+
+# remove_one <slug>
+remove_one() {
+  local slug=$1
+  local path="$WT_ROOT/$slug"
+  local branch
+  [[ -d "$path" ]] || die "no worktree at .claude/worktrees/$slug"
+
+  # Read the branch from the worktree rather than guessing at a naming scheme —
+  # some of these were created by Claude Code's own worktree tool.
+  branch=$(git -C "$path" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+
+  if [[ $FORCE -eq 0 ]]; then
+    if [[ -n "$(git -C "$path" status --porcelain 2>/dev/null)" ]]; then
+      warn "$slug has uncommitted changes:"
+      git -C "$path" status --short | sed 's/^/    /'
+      guard_fail "$slug: refusing to remove (uncommitted changes)" || return 1
+    fi
+    if [[ -n "$branch" && "$branch" != "HEAD" ]]; then
+      local unpushed
+      unpushed=$(git -C "$path" log --oneline "@{upstream}..HEAD" 2>/dev/null || \
+                 git -C "$path" log --oneline "origin/main..HEAD" 2>/dev/null || true)
+      if [[ -n "$unpushed" ]]; then
+        warn "$slug has commits not on the remote:"
+        printf '%s\n' "$unpushed" | sed 's/^/    /'
+        guard_fail "$slug: refusing to remove (unpushed commits)" || return 1
+      fi
+    fi
+  fi
+
+  if [[ $DROP_DB -eq 1 ]] && command -v mongosh >/dev/null; then
+    local dbname
+    dbname=$(awk -F= '/^MONGO_DB_NAME=/{print $2; exit}' "$path/.env" 2>/dev/null || true)
+    if [[ -n "$dbname" && "$dbname" == *_wt_* ]]; then
+      info "dropping mongo database $dbname"
+      mongosh --quiet --eval "db.getSiblingDB('$dbname').dropDatabase()" >/dev/null \
+        || warn "could not drop $dbname (is mongo running?)"
+    fi
+  fi
+
+  if command -v tmux >/dev/null && tmux has-session -t "$REPO_NAME" 2>/dev/null; then
+    tmux kill-window -t "$REPO_NAME:$slug" 2>/dev/null && info "closed tmux window $slug" || true
+  fi
+
+  info "removing worktree $slug"
+  git -C "$MAIN_REPO" worktree remove --force "$path"
+
+  if [[ -n "$branch" && "$branch" != "HEAD" && "$branch" != "main" ]]; then
+    git -C "$MAIN_REPO" branch -D "$branch" >/dev/null && info "deleted branch $branch"
+  fi
+}
+
+if [[ $MERGED -eq 1 ]]; then
+  SWEEP=1
+  git -C "$MAIN_REPO" fetch --quiet origin 2>/dev/null || warn "fetch failed — using local origin/main"
+  found=0
+  while IFS= read -r slug; do
+    [[ -n "$slug" ]] || continue
+    path="$WT_ROOT/$slug"
+    branch=$(git -C "$path" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+    [[ -n "$branch" ]] || continue
+    if git -C "$MAIN_REPO" merge-base --is-ancestor "$branch" origin/main 2>/dev/null; then
+      remove_one "$slug" && found=1 || true
+    fi
+  done < <(list_slugs)
+  [[ $found -eq 1 ]] || info "nothing merged to sweep"
+  git -C "$MAIN_REPO" worktree prune
+  exit 0
+fi
+
+if [[ -z "$SLUG" ]]; then
+  command -v fzf >/dev/null || die "no slug given and fzf is not installed"
+  SLUG=$(list_slugs | fzf --prompt='remove worktree> ' --height=40% --reverse) || exit 0
+  [[ -n "$SLUG" ]] || exit 0
+fi
+
+remove_one "$SLUG"
+git -C "$MAIN_REPO" worktree prune
