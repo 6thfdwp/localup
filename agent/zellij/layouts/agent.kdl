@@ -1,0 +1,24 @@
+// One tab per task: agent pane on the left, shell for tests and git on the right.
+// Same shape `wt` builds in tmux.
+//
+//   zellij --layout agent                     new session in the current directory
+//   zellij action new-tab --layout agent \
+//     --name <task> --cwd <worktree>          add a task tab to the current session
+
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+        children
+        pane size=1 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+    tab focus=true {
+        pane split_direction="vertical" {
+            pane name="agent" size="60%" focus=true
+            pane name="shell"
+        }
+    }
+}
