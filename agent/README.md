@@ -26,8 +26,8 @@ wt-rm fix-parser   # tear down; refuses if uncommitted or unpushed
 wt-rm --merged     # sweep everything already merged into main
 ```
 
-In tmux: `Ctrl+b Space` fuzzy-jumps between tasks, `Alt+h`/`Alt+l` step between
-them, `Ctrl+b d` detaches and leaves agents running, `Ctrl+b m` toggles mouse.
+In tmux: `Ctrl+a Space` fuzzy-jumps between tasks, `Alt+h`/`Alt+l` step between
+them, `Ctrl+a d` detaches and leaves agents running, `Ctrl+a m` toggles mouse.
 
 Worktrees live in `<repo>/.claude/worktrees/<slug>` on branch `wt/<slug>`.
 

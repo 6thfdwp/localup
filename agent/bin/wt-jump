@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# fzf task switcher: pick any window in any session and jump to it.
+# Bound to prefix+Space in tmux.conf.
+#
+# This lives in its own script rather than inline in tmux.conf on purpose.
+# run-shell and display-popup expand #{...} against the *current* pane before
+# the shell ever sees the command, so an inline -F format collapses into one
+# hardcoded line repeated once per window. Out here, tmux never sees the format.
+
+set -uo pipefail
+
+target=$(tmux list-windows -a -F '#{session_name}:#{window_index} #{window_name}' \
+    | fzf --reverse --prompt='task> ' --exit-0 \
+    | cut -d' ' -f1)
+
+[ -n "$target" ] && tmux switch-client -t "$target"

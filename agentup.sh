@@ -6,8 +6,8 @@
 #   bash agentup.sh          install / update everything (idempotent)
 #   bash agentup.sh --check   report what's installed, change nothing
 #
-# Installs tmux + fzf, links the tmux/Ghostty configs, and puts the `wt` and
-# `wt-rm` worktree tools on PATH. Config files are SYMLINKED back into this
+# Installs tmux + fzf, links the tmux/Ghostty configs, and puts the `wt`,
+# `wt-rm` and `wt-jump` tools on PATH. Config files are SYMLINKED back into this
 # repo, so editing them here updates them live everywhere and the changes are
 # tracked in git. Anything already in place is backed up before being replaced.
 
@@ -103,9 +103,10 @@ echo_info "[2/5] tmux config"
 link "$SRC/tmux.conf" "$HOME/.tmux.conf"
 
 # --- 3. worktree tools ------------------------------------------------------
-echo_info "[3/5] Worktree tools (wt, wt-rm)"
+echo_info "[3/5] Worktree tools (wt, wt-rm, wt-jump)"
 link "$SRC/bin/wt" "$HOME/.local/bin/wt"
 link "$SRC/bin/wt-rm" "$HOME/.local/bin/wt-rm"
+link "$SRC/bin/wt-jump" "$HOME/.local/bin/wt-jump"
 
 # Per-repo configs. Never clobber these — they can hold machine-local tweaks.
 mkdir -p "$HOME/.config/wt"
@@ -184,10 +185,10 @@ cat <<'EOF'
     wt-rm --merged    sweep everything already merged into main
 
   In tmux:
-    Ctrl+b Space      fuzzy-jump between tasks
+    Ctrl+a Space      fuzzy-jump between tasks
     Alt+h / Alt+l     previous / next task
-    Ctrl+b d          detach (agents keep running)
-    Ctrl+b m          toggle mouse mode
+    Ctrl+a d          detach (agents keep running)
+    Ctrl+a m          toggle mouse mode
 
   For a new repo, copy the template and edit:
     cp ~/.config/wt/example.conf ~/.config/wt/<repo-name>.conf
