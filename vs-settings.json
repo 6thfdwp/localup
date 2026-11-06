@@ -34,8 +34,6 @@
     },
     "go.alternateTools": {},
     "editor.accessibilitySupport": "off",
-    "go.gopath": "/Users/wp.larryd/go",
-    "go.goroot": "/Users/wp.larryd/.g/go",
     "editor.renderWhitespace": "all",
     "terminal.external.osxExec": "Warp.app",
     "[python]": {
@@ -43,7 +41,6 @@
     },
     "go.buildTags": "integration",
     "vim.vimrc.enable": true,
-    "vim.vimrc.path": "/Users/wp.larryd/.ideavimrc",
     "editor.unicodeHighlight.ambiguousCharacters": false,
     "markdown.preview.scrollEditorWithPreview": false,
     "security.promptForLocalFileProtocolHandling": false,

@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# DRYRUN=1 (or `make gitconfig dryrun`) shows the current state and changes nothing.
+if [ "${DRYRUN:-0}" = 1 ]; then
+    echo "DRY RUN: nothing will be changed. Current state:"
+    echo "  user.name:          $(git config --global user.name || echo '<unset>')"
+    echo "  user.email:         $(git config --global user.email || echo '<unset>')"
+    echo "  init.defaultBranch: $(git config --global init.defaultBranch || echo '<unset>')"
+    echo "  alias.logline:      $(git config --global alias.logline > /dev/null && echo set || echo '<unset>')"
+    if [ -f "$HOME/.ssh/id_ed25519" ]; then
+        echo "  SSH key:            exists, would be reused"
+    else
+        echo "  SSH key:            missing, would generate ~/.ssh/id_ed25519"
+    fi
+    echo "Would prompt for name and email, then set the config above."
+    exit 0
+fi
+
 echo "==== Git Global Configuration ===="
 
 # Prompt for Git user.name

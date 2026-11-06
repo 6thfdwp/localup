@@ -5,9 +5,11 @@
 #
 #   bash agentup.sh          install / update everything (idempotent)
 #   bash agentup.sh --check   report what's installed, change nothing
+#   (DRYRUN=1 / `make agentup dryrun` does the same)
 #
-# Installs tmux + fzf, links the tmux/Ghostty configs, and puts the `wt`,
-# `wt-rm` and `wt-jump` tools on PATH. Config files are SYMLINKED back into this
+# Installs tmux + fzf, links the tmux config, sets up Claude Code skills,
+# plugins and MCP servers, and puts the `wt`, `wt-rm` and `wt-jump` tools on
+# PATH. Config files are SYMLINKED back into this
 # repo, so editing them here updates them live everywhere and the changes are
 # tracked in git. Anything already in place is backed up before being replaced.
 
@@ -21,7 +23,7 @@ echo_error() { echo -e "\033[1;31m$1\033[0m"; }
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC="$REPO_DIR/agent"
 CHECK_ONLY=0
-[ "${1:-}" = "--check" ] && CHECK_ONLY=1
+if [ "${1:-}" = "--check" ] || [ "${DRYRUN:-0}" = 1 ]; then CHECK_ONLY=1; fi
 
 BACKUP_DIR="$HOME/.agentup-backup/$(date +%Y%m%d-%H%M%S)"
 CHANGED=0
@@ -133,35 +135,71 @@ else
     echo_success "  ✓ ~/.local/bin on PATH"
 fi
 
-# --- 4. Ghostty -------------------------------------------------------------
-echo_info "[4/5] Ghostty"
-GHOSTTY_APP="/Applications/Ghostty.app"
-if [ -d "$GHOSTTY_APP" ]; then
-    link "$SRC/ghostty.conf" \
-         "$HOME/Library/Application Support/com.mitchellh.ghostty/config.ghostty"
+# --- 4. Claude Code skills, plugins, MCP ------------------------------------
+echo_info "[4/5] Claude Code skills, plugins, MCP"
 
-    # Ghostty sets TERM=xterm-ghostty but ships its terminfo inside the app
-    # bundle. Anything that doesn't inherit TERMINFO (sudo, a tmux server
-    # started elsewhere) then loses truecolor. Install it into the user db.
-    if ! infocmp xterm-ghostty &> /dev/null; then
-        if [ $CHECK_ONLY -eq 1 ]; then
-            echo_warn "  ~ xterm-ghostty terminfo not installed"
-        else
-            tf="$GHOSTTY_APP/Contents/Resources/terminfo"
-            if TERMINFO="$tf" infocmp -x xterm-ghostty > /tmp/ghostty.ti 2>/dev/null \
-               && tic -x -o "$HOME/.terminfo" /tmp/ghostty.ti 2>/dev/null; then
-                echo_success "  ✓ installed xterm-ghostty terminfo"
-                CHANGED=1
-            else
-                echo_warn "  could not install xterm-ghostty terminfo (cosmetic only)"
-            fi
-            rm -f /tmp/ghostty.ti
-        fi
+# install_skill <name> <package> — public skills via the skills CLI.
+# Needs npx (Node comes from `make devup`).
+install_skill() {
+    local name=$1 pkg=$2
+
+    if [ -e "$HOME/.claude/skills/$name" ]; then
+        echo_success "  ✓ skill $name"
+    elif [ $CHECK_ONLY -eq 1 ]; then
+        echo_warn "  ~ skill $name not installed ($pkg)"
+    elif ! command -v npx &> /dev/null; then
+        echo_warn "  ~ npx not found — run 'make devup', then re-run, to get $name"
+    elif npx --yes skills add "$pkg" -g -a claude-code -s "$name" -y > /dev/null 2>&1; then
+        echo_success "  ✓ installed skill $name"
+        CHANGED=1
     else
-        echo_success "  ✓ xterm-ghostty terminfo"
+        echo_error "  ✗ failed to install skill $name from $pkg"
     fi
+}
+install_skill humanizer blader/humanizer
+install_skill idea-refine addyosmani/agent-skills
+install_skill interview-me addyosmani/agent-skills
+
+if ! command -v claude &> /dev/null; then
+    echo_warn "  ~ claude not on PATH — skipping plugins and MCP servers"
 else
-    echo_warn "  ~ Ghostty not installed — skipping (brew install --cask ghostty)"
+    # install_plugin <plugin@marketplace>. context7 also brings its MCP server.
+    PLUGINS_INSTALLED=$(claude plugin list 2>/dev/null)
+    install_plugin() {
+        if grep -q "❯ $1\$" <<< "$PLUGINS_INSTALLED"; then
+            echo_success "  ✓ plugin $1"
+        elif [ $CHECK_ONLY -eq 1 ]; then
+            echo_warn "  ~ plugin $1 not installed"
+        elif claude plugin install "$1" > /dev/null 2>&1; then
+            echo_success "  ✓ installed plugin $1"
+            CHANGED=1
+        else
+            echo_error "  ✗ failed to install plugin $1"
+        fi
+    }
+    install_plugin commit-commands@claude-plugins-official
+    install_plugin context7@claude-plugins-official
+    install_plugin feature-dev@claude-plugins-official
+    install_plugin frontend-design@claude-plugins-official
+    install_plugin pyright-lsp@claude-plugins-official
+    install_plugin ralph-loop@claude-plugins-official
+
+    # install_mcp <name> <url> — user-scoped HTTP server. OAuth happens on first
+    # use (/mcp inside Claude Code); no secrets are stored here.
+    install_mcp() {
+        local name=$1 url=$2
+        if claude mcp get "$name" &> /dev/null; then
+            echo_success "  ✓ mcp $name"
+        elif [ $CHECK_ONLY -eq 1 ]; then
+            echo_warn "  ~ mcp $name not configured"
+        elif claude mcp add --scope user --transport http "$name" "$url" > /dev/null 2>&1; then
+            echo_success "  ✓ added mcp $name (authenticate via /mcp)"
+            CHANGED=1
+        else
+            echo_error "  ✗ failed to add mcp $name"
+        fi
+    }
+    install_mcp linear-server https://mcp.linear.app/mcp
 fi
 
 # --- 5. summary -------------------------------------------------------------
@@ -192,6 +230,4 @@ cat <<'EOF'
 
   For a new repo, copy the template and edit:
     cp ~/.config/wt/example.conf ~/.config/wt/<repo-name>.conf
-
-  Restart Ghostty for its config to take effect.
 EOF

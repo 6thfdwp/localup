@@ -14,7 +14,6 @@ these files updates your live setup and the change is tracked in git.
 | `bin/wt` | `~/.local/bin/wt` | Create/enter a worktree + its tmux window |
 | `bin/wt-rm` | `~/.local/bin/wt-rm` | Tear one down, with safety guards |
 | `tmux.conf` | `~/.tmux.conf` | Window-per-task tmux setup |
-| `ghostty.conf` | Ghostty app support dir | Terminal config |
 | `wt/example.conf` | `~/.config/wt/` | Template for onboarding a new repo |
 
 ## Daily use
@@ -58,12 +57,13 @@ The part worth thinking about is `wt_configure`. Parallel worktrees share
 whatever your app talks to locally — the same Postgres, the same Redis, the
 same port. Without isolation, two agents running tests corrupt each other's
 data. If those are env-driven, rewriting them per worktree fixes it entirely;
-see `wt/csp-arxiv-service.conf` for a working example.
+see the commented example in `wt/example.conf`.
 
 ## Notes
 
 Per-repo configs deliberately live outside the repos they configure, so machine-
 local setup never shows up in `git status` of a shared codebase.
 
-`macos-option-as-alt = true` in `ghostty.conf` is load-bearing — without it
-macOS eats Option and none of the `Alt`-based tmux bindings fire.
+Your terminal must send Option as Alt, or none of the `Alt`-based tmux bindings
+fire (Ghostty: `macos-option-as-alt = true`; Terminal.app: "Use Option as Meta
+key"; iTerm2: Left Option key = Esc+).
