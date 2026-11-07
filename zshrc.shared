@@ -1,0 +1,28 @@
+# Shared zsh config, sourced from ~/.zshrc by `make devup`.
+# Machine-specific lines (installer appends, local PATH entries) go in ~/.zshrc
+# below the source line, not here.
+
+# Oh My Zsh
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="amuse"
+plugins=(git history-substring-search)
+[ -r "$ZSH/oh-my-zsh.sh" ] && source "$ZSH/oh-my-zsh.sh"
+
+# PATH: ~/.local/bin (wt, uv, claude), then Homebrew on top of it.
+export PATH="$HOME/.local/bin:$PATH"
+for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+  if [ -x "$brew_bin" ]; then
+    eval "$("$brew_bin" shellenv)"
+    break
+  fi
+done
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+
+# g (Go version manager) puts GOROOT on PATH. The oh-my-zsh git plugin defines
+# an alias `g` for git that would shadow it.
+[ -s "$HOME/.g/env" ] && \. "$HOME/.g/env"
+unalias g 2>/dev/null

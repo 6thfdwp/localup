@@ -30,7 +30,7 @@ from the new location relinks them.
 |---|---|
 | `make init` | Xcode Command Line Tools, Homebrew, git, zsh, Oh My Zsh, Chrome, Rectangle |
 | `make gitconfig` | Prompts for git name/email, sets defaults, generates an SSH key (interactive) |
-| `make devup` | nvm + Node LTS, `g` + Go 1.23.6, `uv`, JetBrains Mono, Warp + settings, Zed + keymap |
+| `make devup` | nvm + Node LTS, `g` + Go 1.23.6, `uv`, JetBrains Mono, Warp + settings, Zed + keymap, zsh config |
 | `make agentup` | tmux, fzf, `wt` / `wt-rm` / `wt-jump`, Claude Code skills, plugins and Linear MCP (details in `agent/README.md`) |
 | `bash zellijup.sh` | Optional Zellij alternative to tmux |
 
@@ -52,6 +52,9 @@ Installed items show `✓`; everything else is printed as `[dry-run] <command>`.
 
 ## Keeping the repo in sync
 
+- **zsh:** `~/.zshrc` sources `zshrc.shared`, so edit that file in the repo. The
+  old `~/.zshrc` is backed up once as `~/.zshrc.bak.<time>`; machine-specific
+  lines go in `~/.zshrc` below the source line.
 - **Zed keymap, tmux config, worktree tools:** symlinked, so editing the live
   file edits the repo. Just commit.
 - **Warp settings:** copied, because Warp rewrites its own file. After changing
@@ -61,7 +64,6 @@ Installed items show `✓`; everything else is printed as `[dry-run] <command>`.
 
 ## Not covered yet
 
-- `.zshrc` is kept in the repo but nothing installs it.
 - `gitalias` is not applied (`gitsetting.sh` sets the same alias itself).
 
 This repo is public: keep tokens, keys and work details out of it.

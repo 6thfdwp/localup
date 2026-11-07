@@ -221,6 +221,26 @@ else
     echo_warning "VSCode not found. Please install VSCode first."
 fi
 
+# ==================== ZSH CONFIG ====================
+# ~/.zshrc just sources zshrc.shared from this repo. An existing ~/.zshrc is
+# backed up first; installer appends and local tweaks then go below the source line.
+echo_info "Setting up zsh config..."
+ZSHRC="$HOME/.zshrc"
+ZSH_SHARED="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/zshrc.shared"
+if grep -q 'localup-managed' "$ZSHRC" 2>/dev/null; then
+    echo_success "✓ ~/.zshrc already sources zshrc.shared."
+else
+    if [ -f "$ZSHRC" ]; then
+        run mv "$ZSHRC" "$ZSHRC.bak.$(date +%Y%m%d-%H%M%S)"
+    fi
+    if [ "$DRYRUN" = 1 ]; then
+        echo_warning "  [dry-run] write ~/.zshrc that sources $ZSH_SHARED"
+    else
+        printf '# localup-managed: edit zshrc.shared in the localup repo; machine-specific lines go below.\nsource "%s"\n' "$ZSH_SHARED" > "$ZSHRC"
+        echo_success "✓ ~/.zshrc now sources zshrc.shared."
+    fi
+fi
+
 # ==================== FINAL SETUP ====================
 if [ "$DRYRUN" = 1 ]; then
     echo_success "Dry run complete; nothing was changed."
