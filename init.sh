@@ -108,16 +108,26 @@ install_cask_if_not() {
 install_cask_if_not "Google Chrome" "google-chrome"
 install_cask_if_not "Rectangle" "rectangle"
 
-# Rectangle settings (customized shortcuts). Imported only into a fresh install:
-# never overwrites existing prefs. Re-export with `make rectangle-export`.
+# Rectangle settings (customized shortcuts) from rectangle.plist. Applied when
+# this machine's settings differ; the current ones are backed up first.
+# Re-export with `make rectangle-export`.
 RECT_PLIST="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/rectangle.plist"
-if defaults read com.knollsoft.Rectangle &> /dev/null; then
-    echo_success "✓ Rectangle already has settings; left as is (make rectangle-export to save yours)."
-elif pgrep -x Rectangle &> /dev/null; then
-    echo_warning "Rectangle is running; quit it and re-run init to import its settings."
+rect_current() {
+    defaults export com.knollsoft.Rectangle - 2> /dev/null | plutil -convert xml1 -o - - 2> /dev/null \
+        | sed -e '/<key>lastVersion<\/key>/,+1d' -e '/<key>SUHasLaunchedBefore<\/key>/,+1d' -e '/<key>SUEnableAutomaticChecks<\/key>/,+1d'
+}
+if [ "$(rect_current)" = "$(sed -e '/<key>lastVersion<\/key>/,+1d' "$RECT_PLIST")" ]; then
+    echo_success "✓ Rectangle shortcuts already match."
 else
+    echo_info "Applying Rectangle shortcuts..."
+    if defaults read com.knollsoft.Rectangle &> /dev/null; then
+        RECT_BAK="$HOME/.rectangle-backup-$(date +%Y%m%d-%H%M%S).plist"
+        run bash -c "defaults export com.knollsoft.Rectangle '$RECT_BAK'"
+        echo_warning "  previous settings backed up to $RECT_BAK"
+    fi
+    run osascript -e 'quit app "Rectangle"'
     run defaults import com.knollsoft.Rectangle "$RECT_PLIST"
-    [ "$DRYRUN" = 1 ] || echo_success "✓ Rectangle settings imported (launch Rectangle to use them)."
+    run open -a Rectangle
 fi
 
 [ "$DRYRUN" = 1 ] && echo_success "Dry run complete; nothing was changed."
