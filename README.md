@@ -59,7 +59,7 @@ Installed items show `✓`; everything else is printed as `[dry-run] <command>`.
 - **Zed keymap, tmux config, worktree tools:** symlinked, so editing the live
   file edits the repo. Just commit.
 - **Warp settings:** copied, because Warp rewrites its own file. After changing
-  settings, run `make warp-export` and commit `warp-settings.toml`. Same for Rectangle: `make rectangle-export` and commit `rectangle.plist`.
+  settings, run `make warp-export` and commit `warp-settings.toml`. Same for Rectangle: `make rectangle-export` and commit `rectangle.plist`; on another Mac run `make rectangle-import` to apply it.
 - **VSCode settings:** copied; re-export by hand into `vs-settings.json`.
 - Existing files are never overwritten silently: they are backed up or left alone.
 
