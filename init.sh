@@ -86,7 +86,8 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
     if [ "$DRYRUN" = 1 ]; then
         echo_warning "  [dry-run] run the Oh My Zsh install script"
     else
-        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+        # RUNZSH/CHSH=no: the installer would otherwise open a new zsh and block this script.
+        RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
     fi
 else
     echo_success "✓ Oh My Zsh already installed."
