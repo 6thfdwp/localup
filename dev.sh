@@ -6,6 +6,8 @@
 set -e
 
 DRYRUN=${DRYRUN:-0}
+# Override with e.g. GO_VERSION=1.26.10 make devup.
+GO_VERSION=${GO_VERSION:-1.27.3}
 
 echo_info() {
     echo -e "\033[1;34m$1\033[0m"
@@ -65,7 +67,7 @@ echo_info "Setting up Node.js environment..."
 # Install NVM (Node Version Manager)
 if [ ! -d "$HOME/.nvm" ]; then
     echo_info "Installing NVM (Node Version Manager)..."
-    run bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash'
+    run bash -c 'curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash'
     export NVM_DIR="$HOME/.nvm"
     [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
     [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
@@ -82,7 +84,7 @@ if command_exists nvm; then
     echo_info "Installing Node.js LTS..."
     run nvm install --lts
     run nvm use --lts
-    run nvm alias default node
+    run nvm alias default 'lts/*'
     [ "$DRYRUN" = 1 ] || echo_success "✓ Node.js setup complete. Version: $(node -v)"
 elif [ "$DRYRUN" = 1 ]; then
     echo_warning "  [dry-run] would install Node.js LTS via nvm"
@@ -107,12 +109,12 @@ if [ -f "$HOME/.g/env" ]; then
 fi
 
 if command_exists g; then
-    echo_info "Installing Go 1.23.6..."
-    run g install 1.23.6
-    run g use 1.23.6
+    echo_info "Installing Go $GO_VERSION..."
+    run g install "$GO_VERSION"
+    run g use "$GO_VERSION"
     [ "$DRYRUN" = 1 ] || echo_success "✓ Go environment setup complete. Version: $(go version)"
 elif [ "$DRYRUN" = 1 ]; then
-    echo_warning "  [dry-run] would install Go 1.23.6 via g"
+    echo_warning "  [dry-run] would install Go $GO_VERSION via g"
 else
     echo_warning "g not found in PATH. Please restart your terminal and run this script again."
 fi

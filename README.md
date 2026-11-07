@@ -30,7 +30,7 @@ from the new location relinks them.
 |---|---|
 | `make init` | Xcode Command Line Tools, Homebrew, git, zsh, Oh My Zsh, Chrome, Rectangle |
 | `make gitconfig` | Prompts for git name/email, sets defaults, generates an SSH key (interactive) |
-| `make devup` | nvm + Node LTS, `g` + Go 1.23.6, `uv`, JetBrains Mono, Warp + settings, Zed + keymap, zsh config |
+| `make devup` | nvm + Node LTS, `g` + Go 1.27.3, `uv`, JetBrains Mono, Warp + settings, Zed + keymap, zsh config |
 | `make agentup` | tmux, fzf, `wt` / `wt-rm` / `wt-jump`, Claude Code skills, plugins and Linear MCP (details in `agent/README.md`) |
 | `bash zellijup.sh` | Optional Zellij alternative to tmux |
 
@@ -47,6 +47,7 @@ Installed items show `✓`; everything else is printed as `[dry-run] <command>`.
 
 ## Options
 
+- `GO_VERSION=1.26.10 make devup` installs a different Go (default 1.27.3).
 - `SETUP_VSCODE=1 make devup` also installs VSCode extensions and settings
   (off by default).
 
