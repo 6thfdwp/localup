@@ -81,11 +81,19 @@ export NVM_DIR="$HOME/.nvm"
 
 # Install and use the latest LTS Node.js version
 if command_exists nvm; then
-    echo_info "Installing Node.js LTS..."
-    run nvm install --lts
-    run nvm use --lts
-    run nvm alias default 'lts/*'
-    [ "$DRYRUN" = 1 ] || echo_success "✓ Node.js setup complete. Version: $(node -v)"
+    # Skip when the newest LTS is already installed and is the default.
+    latest_lts=$(nvm version-remote --lts 2>/dev/null || true)
+    if [ -n "$latest_lts" ] && [ "$latest_lts" != "N/A" ] \
+        && [ "$(nvm version "$latest_lts" 2>/dev/null)" = "$latest_lts" ] \
+        && [ "$(nvm version default 2>/dev/null)" = "$latest_lts" ]; then
+        echo_success "✓ Node.js LTS $latest_lts already installed and default."
+    else
+        echo_info "Installing Node.js LTS..."
+        run nvm install --lts
+        run nvm use --lts
+        run nvm alias default 'lts/*'
+        [ "$DRYRUN" = 1 ] || echo_success "✓ Node.js setup complete. Version: $(node -v)"
+    fi
 elif [ "$DRYRUN" = 1 ]; then
     echo_warning "  [dry-run] would install Node.js LTS via nvm"
 else
@@ -109,10 +117,19 @@ if [ -f "$HOME/.g/env" ]; then
 fi
 
 if command_exists g; then
-    echo_info "Installing Go $GO_VERSION..."
-    run g install "$GO_VERSION"
-    run g use "$GO_VERSION"
-    [ "$DRYRUN" = 1 ] || echo_success "✓ Go environment setup complete. Version: $(go version)"
+    # `g install` exits non-zero when the version is already there, so check first.
+    if [ -d "$HOME/.g/versions/$GO_VERSION" ]; then
+        echo_success "✓ Go $GO_VERSION already installed."
+    else
+        echo_info "Installing Go $GO_VERSION..."
+        run g install "$GO_VERSION"
+    fi
+    if go version 2>/dev/null | grep -q "go$GO_VERSION "; then
+        echo_success "✓ Go $GO_VERSION is active."
+    else
+        run g use "$GO_VERSION"
+        [ "$DRYRUN" = 1 ] || echo_success "✓ Go environment setup complete. Version: $(go version)"
+    fi
 elif [ "$DRYRUN" = 1 ]; then
     echo_warning "  [dry-run] would install Go $GO_VERSION via g"
 else
