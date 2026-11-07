@@ -8,7 +8,7 @@ ifneq ($(filter dryrun,$(MAKECMDGOALS)),)
 export DRYRUN := 1
 endif
 
-.PHONY: init devup gitconfig warp-export agentup agentup-check dryrun
+.PHONY: init devup gitconfig warp-export rectangle-export agentup agentup-check dryrun
 dryrun: ; @:
 
 # Target to run the local Mac setup script
@@ -24,6 +24,11 @@ gitconfig:
 # Save this machine's Warp settings into the repo
 warp-export:
 	cp ~/.warp/settings.toml warp-settings.toml
+
+# Save this machine's Rectangle settings (customized shortcuts) into the repo
+rectangle-export:
+	defaults export com.knollsoft.Rectangle - | plutil -convert xml1 -o rectangle.plist -
+	@for k in lastVersion SUHasLaunchedBefore SUEnableAutomaticChecks; do /usr/libexec/PlistBuddy -c "Delete :$$k" rectangle.plist 2>/dev/null || true; done
 
 # Parallel-agent workflow: tmux + git worktree tooling (wt / wt-rm)
 agentup:

@@ -28,7 +28,7 @@ from the new location relinks them.
 
 | Target | Does |
 |---|---|
-| `make init` | Xcode Command Line Tools, Homebrew, git, zsh, Oh My Zsh, Chrome, Rectangle |
+| `make init` | Xcode Command Line Tools, Homebrew, git, zsh, Oh My Zsh, Chrome, Rectangle (+ its shortcuts from `rectangle.plist`) |
 | `make gitconfig` | Prompts for git name/email, sets defaults, generates an SSH key (interactive) |
 | `make devup` | nvm + Node LTS, `g` + Go 1.27.3, `uv`, JetBrains Mono, Warp + settings, Zed + keymap, zsh config |
 | `make agentup` | tmux, fzf, `wt` / `wt-rm` / `wt-jump`, Claude Code skills, plugins and Linear MCP (details in `agent/README.md`) |
@@ -59,7 +59,7 @@ Installed items show `✓`; everything else is printed as `[dry-run] <command>`.
 - **Zed keymap, tmux config, worktree tools:** symlinked, so editing the live
   file edits the repo. Just commit.
 - **Warp settings:** copied, because Warp rewrites its own file. After changing
-  settings, run `make warp-export` and commit `warp-settings.toml`.
+  settings, run `make warp-export` and commit `warp-settings.toml`. Same for Rectangle: `make rectangle-export` and commit `rectangle.plist`.
 - **VSCode settings:** copied; re-export by hand into `vs-settings.json`.
 - Existing files are never overwritten silently: they are backed up or left alone.
 

@@ -108,5 +108,17 @@ install_cask_if_not() {
 install_cask_if_not "Google Chrome" "google-chrome"
 install_cask_if_not "Rectangle" "rectangle"
 
+# Rectangle settings (customized shortcuts). Imported only into a fresh install:
+# never overwrites existing prefs. Re-export with `make rectangle-export`.
+RECT_PLIST="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/rectangle.plist"
+if defaults read com.knollsoft.Rectangle &> /dev/null; then
+    echo_success "✓ Rectangle already has settings; left as is (make rectangle-export to save yours)."
+elif pgrep -x Rectangle &> /dev/null; then
+    echo_warning "Rectangle is running; quit it and re-run init to import its settings."
+else
+    run defaults import com.knollsoft.Rectangle "$RECT_PLIST"
+    [ "$DRYRUN" = 1 ] || echo_success "✓ Rectangle settings imported (launch Rectangle to use them)."
+fi
+
 [ "$DRYRUN" = 1 ] && echo_success "Dry run complete; nothing was changed."
 true
