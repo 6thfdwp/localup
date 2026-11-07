@@ -109,7 +109,7 @@ install_cask_if_not "Google Chrome" "google-chrome"
 install_cask_if_not "Rectangle" "rectangle"
 
 # Rectangle settings (customized shortcuts) from rectangle.plist. Applied when
-# this machine's settings differ; the current ones are backed up first.
+# this machine's settings differ (overwrites them).
 # Re-export with `make rectangle-export`.
 RECT_PLIST="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/rectangle.plist"
 rect_current() {
@@ -120,11 +120,6 @@ if [ "$(rect_current)" = "$(sed -e '/<key>lastVersion<\/key>/,+1d' "$RECT_PLIST"
     echo_success "✓ Rectangle shortcuts already match."
 else
     echo_info "Applying Rectangle shortcuts..."
-    if defaults read com.knollsoft.Rectangle &> /dev/null; then
-        RECT_BAK="$HOME/.rectangle-backup-$(date +%Y%m%d-%H%M%S).plist"
-        run bash -c "defaults export com.knollsoft.Rectangle '$RECT_BAK'"
-        echo_warning "  previous settings backed up to $RECT_BAK"
-    fi
     run osascript -e 'quit app "Rectangle"'
     run defaults import com.knollsoft.Rectangle "$RECT_PLIST"
     run open -a Rectangle
