@@ -7,7 +7,7 @@
 #   bash agentup.sh --check   report what's installed, change nothing
 #   (DRYRUN=1 / `make agentup dryrun` does the same)
 #
-# Installs tmux + fzf, links the tmux config, sets up Claude Code skills,
+# Installs tmux + fzf, links the tmux config, installs Claude Code and sets up skills,
 # plugins and MCP servers, and puts the `wt`, `wt-rm` and `wt-jump` tools on
 # PATH. Config files are SYMLINKED back into this
 # repo, so editing them here updates them live everywhere and the changes are
@@ -159,6 +159,19 @@ install_skill() {
 install_skill humanizer blader/humanizer
 install_skill idea-refine addyosmani/agent-skills
 install_skill interview-me addyosmani/agent-skills
+
+# Claude Code itself: native installer (self-updating; lands in ~/.local/bin).
+export PATH="$HOME/.local/bin:$PATH"
+if command -v claude &> /dev/null; then
+    echo_success "  ✓ claude ($(claude --version 2>&1 | head -1))"
+elif [ $CHECK_ONLY -eq 1 ]; then
+    echo_warn "  ~ claude not installed"
+elif curl -fsSL https://claude.ai/install.sh | bash > /dev/null 2>&1; then
+    echo_success "  ✓ installed claude"
+    CHANGED=1
+else
+    echo_error "  ✗ failed to install claude (https://claude.ai/install.sh)"
+fi
 
 if ! command -v claude &> /dev/null; then
     echo_warn "  ~ claude not on PATH — skipping plugins and MCP servers"
