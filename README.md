@@ -28,7 +28,7 @@ from the new location relinks them.
 
 | Target | Does |
 |---|---|
-| `make init` | Xcode Command Line Tools, Homebrew, git, zsh, Oh My Zsh, Chrome, Rectangle (+ its shortcuts from `rectangle.plist`) |
+| `make init` | Xcode Command Line Tools, Homebrew, git, zsh, Oh My Zsh, Chrome, Claude desktop app, Rectangle (+ its shortcuts from `rectangle.plist`) |
 | `make gitconfig` | Prompts for git name/email, sets defaults, generates an SSH key (interactive) |
 | `make devup` | nvm + Node LTS, `g` + Go 1.27.3, `uv`, JetBrains Mono, Warp + settings, Zed + keymap, zsh config |
 | `make agentup` | tmux, fzf, `wt` / `wt-rm` / `wt-jump`, Claude Code skills, plugins and Linear MCP (details in `agent/README.md`) |

@@ -107,6 +107,7 @@ install_cask_if_not() {
 # Apps
 install_cask_if_not "Google Chrome" "google-chrome"
 install_cask_if_not "Rectangle" "rectangle"
+install_cask_if_not "Claude" "claude"
 
 # Rectangle settings (customized shortcuts) from rectangle.plist. Applied when
 # this machine's settings differ (overwrites them).
