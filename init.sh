@@ -48,6 +48,13 @@ if ! command -v brew &> /dev/null; then
     fi
 else
     echo_success "✓ Homebrew already installed."
+    # A Homebrew owned by another user (shared/managed Mac) can't be written to.
+    BREW_PREFIX="$(brew --prefix)"
+    if [ ! -w "$BREW_PREFIX/Cellar" ]; then
+        echo_error "Homebrew at $BREW_PREFIX is not writable by $(id -un) (owner: $(stat -f %Su "$BREW_PREFIX/Cellar"))."
+        echo_error "Ask that account to run the installs, get added to the admin group, or install Homebrew under your home."
+        [ "$DRYRUN" = 1 ] || exit 1
+    fi
 fi
 
 # Update Homebrew and install essential packages
@@ -117,7 +124,9 @@ rect_current() {
     defaults export com.knollsoft.Rectangle - 2> /dev/null | plutil -convert xml1 -o - - 2> /dev/null \
         | sed -e '/<key>lastVersion<\/key>/,+1d' -e '/<key>SUHasLaunchedBefore<\/key>/,+1d' -e '/<key>SUEnableAutomaticChecks<\/key>/,+1d'
 }
-if [ "$(rect_current)" = "$(sed -e '/<key>lastVersion<\/key>/,+1d' "$RECT_PLIST")" ]; then
+if [ "$DRYRUN" != 1 ] && [ ! -d "/Applications/Rectangle.app" ] && [ ! -d "$HOME/Applications/Rectangle.app" ]; then
+    echo_warning "Rectangle is not installed; skipping its shortcuts."
+elif [ "$(rect_current)" = "$(sed -e '/<key>lastVersion<\/key>/,+1d' "$RECT_PLIST")" ]; then
     echo_success "✓ Rectangle shortcuts already match."
 else
     echo_info "Applying Rectangle shortcuts..."
