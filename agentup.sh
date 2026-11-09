@@ -177,25 +177,27 @@ if ! command -v claude &> /dev/null; then
     echo_warn "  ~ claude not on PATH — skipping plugins and MCP servers"
 else
     # install_plugin <plugin@marketplace>. context7 also brings its MCP server.
+    # A fresh claude install doesn't know the official marketplace yet.
+    if [ $CHECK_ONLY -eq 0 ] && ! claude plugin marketplace list 2>/dev/null | grep -q "claude-plugins-official"; then
+        claude plugin marketplace add anthropics/claude-plugins-official > /dev/null 2>&1 \
+            || echo_error "  ✗ failed to add marketplace anthropics/claude-plugins-official"
+    fi
     PLUGINS_INSTALLED=$(claude plugin list 2>/dev/null)
     install_plugin() {
+        local out
         if grep -q "❯ $1\$" <<< "$PLUGINS_INSTALLED"; then
             echo_success "  ✓ plugin $1"
         elif [ $CHECK_ONLY -eq 1 ]; then
             echo_warn "  ~ plugin $1 not installed"
-        elif claude plugin install "$1" > /dev/null 2>&1; then
+        elif out=$(claude plugin install "$1" 2>&1); then
             echo_success "  ✓ installed plugin $1"
             CHANGED=1
         else
             echo_error "  ✗ failed to install plugin $1"
+            echo "$out" | tail -3 | sed 's/^/      /'
         fi
     }
-    install_plugin commit-commands@claude-plugins-official
     install_plugin context7@claude-plugins-official
-    install_plugin feature-dev@claude-plugins-official
-    install_plugin frontend-design@claude-plugins-official
-    install_plugin pyright-lsp@claude-plugins-official
-    install_plugin ralph-loop@claude-plugins-official
 
     # install_mcp <name> <url> — user-scoped HTTP server. OAuth happens on first
     # use (/mcp inside Claude Code); no secrets are stored here.
